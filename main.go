@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	version "github.com/hashicorp/go-version"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
@@ -15,7 +16,7 @@ import (
 
 var (
 	mininetAddress string
-	Port           int = 9881
+	Version        string = "0.1.0-alpha"
 )
 
 const (
@@ -23,6 +24,12 @@ const (
 )
 
 func main() {
+	if Version != "rolling" {
+		if _, err := version.NewVersion(Version); err != nil {
+			logrus.Fatalln("Invalid exporter version")
+		}
+	}
+
 	flag.StringVar(&mininetAddress, "address", "http://localhost:8080", "Address in which the Mininet API can be accessed via (not including api prefix)")
 	flag.Parse()
 
@@ -32,6 +39,7 @@ func main() {
 	prometheus.MustRegister(collector.NewPingCollector(client))
 
 	logrus.Infoln("Mininet Exporter Starting...")
+	logrus.Infoln("  - version: ", Version)
 
 	handler := promhttp.Handler()
 	http.Handle(metricsPath, handler)
