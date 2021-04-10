@@ -15,8 +15,7 @@ import (
 )
 
 var (
-	mininetAddress string
-	Version        string = "0.1.0-alpha"
+	Version string = "rolling"
 )
 
 const (
