@@ -17,6 +17,7 @@ func NewClient(address string) *Client {
 			"message":       err.Error(),
 		}).Fatalln("Could not create Mininet API client")
 	}
+	logrus.Infoln("⚙️	mininet target: ", baseURL.String())
 
 	var c Client
 

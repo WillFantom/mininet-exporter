@@ -1,14 +1,14 @@
 package main
 
 import (
-	"flag"
-	"log"
+	"fmt"
 	"net/http"
 
 	version "github.com/hashicorp/go-version"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 
 	"github.com/willfantom/mininet-exporter/collector"
 	"github.com/willfantom/mininet-exporter/mininet"
@@ -24,22 +24,17 @@ const (
 )
 
 func main() {
+	logrus.Infoln("Mininet Exporter Starting...")
+	logrus.Debugln("#️⃣	version: ", Version)
+
 	if Version != "rolling" {
 		if _, err := version.NewVersion(Version); err != nil {
 			logrus.Fatalln("Invalid exporter version")
 		}
 	}
 
-	flag.StringVar(&mininetAddress, "address", "http://localhost:8080", "Address in which the Mininet API can be accessed via (not including api prefix)")
-	flag.Parse()
-
-	client := mininet.NewClient(mininetAddress)
-
-	prometheus.MustRegister(prometheus.NewBuildInfoCollector())
-	prometheus.MustRegister(collector.NewPingCollector(client))
-
-	logrus.Infoln("Mininet Exporter Starting...")
-	logrus.Infoln("  - version: ", Version)
+	client := mininet.NewClient(viper.GetString("MininetTarget"))
+	registration(client)
 
 	handler := promhttp.Handler()
 	http.Handle(metricsPath, handler)
@@ -53,8 +48,14 @@ func main() {
 		</html>`))
 	})
 
-	err := http.ListenAndServe("0.0.0.0:9881", nil)
-	if err != nil {
-		log.Fatal(err)
+	if err := http.ListenAndServe(viper.GetString("ServeAddress")+":"+fmt.Sprintf("%d", viper.GetInt("ServePort")), nil); err != nil {
+		logrus.WithField("err msg", err.Error()).Fatalln("🆘	http server failed: exiting")
+	}
+}
+
+func registration(client *mininet.Client) {
+	prometheus.MustRegister(prometheus.NewBuildInfoCollector())
+	if viper.GetBool("PingAllTest") {
+		prometheus.MustRegister(collector.NewPingCollector(client))
 	}
 }

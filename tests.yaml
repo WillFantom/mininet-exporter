@@ -1,0 +1,3 @@
+Debug: true
+MininetTarget: "http://mininet:8080"
+PingAllTest: true
