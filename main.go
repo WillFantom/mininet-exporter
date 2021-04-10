@@ -23,12 +23,12 @@ const (
 )
 
 func main() {
-	logrus.Infoln("Mininet Exporter Starting...")
+	logrus.Infoln("mininet exporter starting...")
 	logrus.Debugln("#️⃣	version: ", Version)
 
 	if Version != "rolling" {
 		if _, err := version.NewVersion(Version); err != nil {
-			logrus.Fatalln("Invalid exporter version")
+			logrus.Fatalln("🆘	invalid exporter version")
 		}
 	}
 

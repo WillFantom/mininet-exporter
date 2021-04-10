@@ -20,10 +20,14 @@ func init() {
 	if !viper.GetBool("Debug") {
 		logrus.SetLevel(logrus.InfoLevel)
 	}
+	if viper.GetBool("Trace") {
+		logrus.SetLevel(logrus.TraceLevel)
+	}
 }
 
 func setDefaultConfiguration() {
 	viper.SetDefault("Debug", false)
+	viper.SetDefault("Trace", false)
 	viper.SetDefault("ServeAddress", "0.0.0.0")
 	viper.SetDefault("ServePort", DefaultServePort)
 	viper.SetDefault("MininetTarget", "http://localhost:8080")

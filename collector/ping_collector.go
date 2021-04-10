@@ -15,6 +15,7 @@ type PingCollector struct {
 }
 
 func NewPingCollector(client *mininet.Client) *PingCollector {
+	logrus.Traceln("🛠	defining pingall collector")
 	specificNamespace := "pingall"
 	return &PingCollector{
 		client: client,
@@ -46,10 +47,11 @@ func (pc *PingCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (pc *PingCollector) Collect(ch chan<- prometheus.Metric) {
+	logrus.Traceln("👀	collecting pingall data...")
 
 	pings, err := pc.client.PingAll()
 	if err != nil {
-		logrus.WithField("message", err).Errorln("could not run pingall on topology")
+		logrus.WithField("message", err).Errorln("⚠️	could not run pingall on topology")
 		return
 	}
 
@@ -80,5 +82,6 @@ func (pc *PingCollector) Collect(ch chan<- prometheus.Metric) {
 		)
 
 	}
+	logrus.Traceln("✅	pingall data collected")
 
 }

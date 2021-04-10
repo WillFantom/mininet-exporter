@@ -18,7 +18,7 @@ func NewClient(address string) *Client {
 		logrus.WithFields(logrus.Fields{
 			"given address": address,
 			"message":       err.Error(),
-		}).Fatalln("Could not create Mininet API client")
+		}).Fatalln("🆘	could not create mininet api client")
 	}
 	logrus.Infoln("⚙️	mininet target: ", baseURL.String())
 
@@ -29,6 +29,8 @@ func NewClient(address string) *Client {
 
 	rand.Seed(time.Now().UnixNano())
 	c.Name = petname.Generate(1, "")
+
+	logrus.WithField("instance name", c.Name).Infoln("✅	created instance name")
 
 	return &c
 }
@@ -42,7 +44,7 @@ func (c *Client) PingAll() (map[string]PingResponse, error) {
 		logrus.WithFields(logrus.Fields{
 			"full url": fullURL.String(),
 			"message":  err.Error(),
-		}).Errorln("Could not create ping all request")
+		}).Errorln("⚠️	could not create ping all request")
 		return nil, err
 	}
 
@@ -51,7 +53,7 @@ func (c *Client) PingAll() (map[string]PingResponse, error) {
 		logrus.WithFields(logrus.Fields{
 			"full url": fullURL.String(),
 			"message":  err.Error(),
-		}).Errorln("Failed ping all request")
+		}).Errorln("⚠️	failed ping all request")
 		return nil, err
 	}
 	defer response.Body.Close()
@@ -61,7 +63,7 @@ func (c *Client) PingAll() (map[string]PingResponse, error) {
 			"full url":        fullURL.String(),
 			"response status": response.StatusCode,
 			"message":         err.Error(),
-		}).Warnln("Failed ping all request")
+		}).Warnln("⚠️	failed ping all request")
 		return nil, err
 	}
 
@@ -71,7 +73,7 @@ func (c *Client) PingAll() (map[string]PingResponse, error) {
 			"full url":        fullURL.String(),
 			"response status": response.StatusCode,
 			"message":         err.Error(),
-		}).Errorln("Failed to parse ping all response")
+		}).Errorln("⚠️	failed to parse ping all response")
 		return nil, err
 	}
 
