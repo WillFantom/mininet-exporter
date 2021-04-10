@@ -7,17 +7,18 @@ import (
 	"github.com/willfantom/mininet-exporter/mininet"
 )
 
-type PingCollector struct {
-	client          *mininet.Client
-	PacketsSent     *prometheus.Desc
-	PacketsReceived *prometheus.Desc
-	RoundTripAvg    *prometheus.Desc
+type PingAllCollector struct {
+	client            *mininet.Client
+	PacketsSent       *prometheus.Desc
+	PacketsReceived   *prometheus.Desc
+	ReceivedSentRatio *prometheus.Desc
+	RoundTripAvg      *prometheus.Desc
 }
 
-func NewPingCollector(client *mininet.Client) *PingCollector {
+func NewPingAllCollector(client *mininet.Client) *PingAllCollector {
 	logrus.Traceln("🛠	defining pingall collector")
 	specificNamespace := "pingall"
-	return &PingCollector{
+	return &PingAllCollector{
 		client: client,
 		PacketsSent: prometheus.NewDesc(
 			prometheus.BuildFQName(getNamespace(client), specificNamespace, "packets_sent"),
@@ -31,6 +32,12 @@ func NewPingCollector(client *mininet.Client) *PingCollector {
 			[]string{"sender", "target"},
 			nil,
 		),
+		ReceivedSentRatio: prometheus.NewDesc(
+			prometheus.BuildFQName(getNamespace(client), specificNamespace, "packets_loss_ratio"),
+			"Number of ping packets being received against being sent",
+			[]string{"sender", "target"},
+			nil,
+		),
 		RoundTripAvg: prometheus.NewDesc(
 			prometheus.BuildFQName(getNamespace(client), specificNamespace, "rtt_average"),
 			"The average round trip time of the ping",
@@ -40,13 +47,13 @@ func NewPingCollector(client *mininet.Client) *PingCollector {
 	}
 }
 
-func (pc *PingCollector) Describe(ch chan<- *prometheus.Desc) {
+func (pc *PingAllCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- pc.PacketsSent
 	ch <- pc.PacketsReceived
 	ch <- pc.RoundTripAvg
 }
 
-func (pc *PingCollector) Collect(ch chan<- prometheus.Metric) {
+func (pc *PingAllCollector) Collect(ch chan<- prometheus.Metric) {
 	logrus.Traceln("👀	collecting pingall data...")
 
 	pings, err := pc.client.PingAll()
@@ -71,6 +78,13 @@ func (pc *PingCollector) Collect(ch chan<- prometheus.Metric) {
 			pc.PacketsReceived,
 			prometheus.GaugeValue,
 			float64(pingData.Received),
+			sender, target,
+		)
+
+		ch <- prometheus.MustNewConstMetric(
+			pc.ReceivedSentRatio,
+			prometheus.CounterValue,
+			float64(pingData.Received/pingData.Sent),
 			sender, target,
 		)
 
