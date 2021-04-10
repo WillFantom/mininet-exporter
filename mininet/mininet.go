@@ -2,9 +2,12 @@ package mininet
 
 import (
 	"encoding/json"
+	"math/rand"
 	"net/http"
 	"net/url"
+	"time"
 
+	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/sirupsen/logrus"
 )
 
@@ -23,6 +26,9 @@ func NewClient(address string) *Client {
 
 	c.BaseURL = baseURL
 	c.httpClient = http.Client{}
+
+	rand.Seed(time.Now().UnixNano())
+	c.Name = petname.Generate(1, "")
 
 	return &c
 }

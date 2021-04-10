@@ -12,6 +12,7 @@ const (
 type Client struct {
 	BaseURL    *url.URL
 	httpClient http.Client
+	Name       string
 }
 
 type PingResponse struct {

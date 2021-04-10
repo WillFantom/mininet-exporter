@@ -19,19 +19,19 @@ func NewPingCollector(client *mininet.Client) *PingCollector {
 	return &PingCollector{
 		client: client,
 		PacketsSent: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, specificNamespace, "packets_sent"),
+			prometheus.BuildFQName(getNamespace(client), specificNamespace, "packets_sent"),
 			"Number of ping packets sent",
 			[]string{"sender", "target"},
 			nil,
 		),
 		PacketsReceived: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, specificNamespace, "packets_received"),
+			prometheus.BuildFQName(getNamespace(client), specificNamespace, "packets_received"),
 			"Number of ping packets received",
 			[]string{"sender", "target"},
 			nil,
 		),
 		RoundTripAvg: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, specificNamespace, "rtt_average"),
+			prometheus.BuildFQName(getNamespace(client), specificNamespace, "rtt_average"),
 			"The average round trip time of the ping",
 			[]string{"sender", "target"},
 			nil,
