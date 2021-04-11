@@ -8,11 +8,10 @@ import (
 )
 
 type PingAllCollector struct {
-	client            *mininet.Client
-	PacketsSent       *prometheus.Desc
-	PacketsReceived   *prometheus.Desc
-	ReceivedSentRatio *prometheus.Desc
-	RoundTripAvg      *prometheus.Desc
+	client          *mininet.Client
+	PacketsSent     *prometheus.Desc
+	PacketsReceived *prometheus.Desc
+	RoundTripAvg    *prometheus.Desc
 }
 
 func NewPingAllCollector(client *mininet.Client) *PingAllCollector {
@@ -31,14 +30,6 @@ func NewPingAllCollector(client *mininet.Client) *PingAllCollector {
 		PacketsReceived: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, specificNamespace, "packets_received"),
 			"Number of ping packets received",
-			[]string{"sender", "target"},
-			prometheus.Labels{
-				"exporter_name": client.Name,
-			},
-		),
-		ReceivedSentRatio: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, specificNamespace, "packets_loss_ratio"),
-			"Number of ping packets being received against being sent",
 			[]string{"sender", "target"},
 			prometheus.Labels{
 				"exporter_name": client.Name,
@@ -86,13 +77,6 @@ func (pc *PingAllCollector) Collect(ch chan<- prometheus.Metric) {
 			pc.PacketsReceived,
 			prometheus.GaugeValue,
 			float64(pingData.Received),
-			sender, target,
-		)
-
-		ch <- prometheus.MustNewConstMetric(
-			pc.ReceivedSentRatio,
-			prometheus.CounterValue,
-			float64(pingData.Received/pingData.Sent),
 			sender, target,
 		)
 
