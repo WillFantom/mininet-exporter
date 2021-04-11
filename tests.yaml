@@ -1,4 +1,13 @@
 Debug: true
-Trace: false
+Trace: true
 MininetTarget: "http://mininet:8080"
 PingAllTest: true
+PingTests:
+  - Sender: "h1"
+    Target: "h2"
+    MinRatio: 1
+    MaxRTT: 10
+  - Sender: "h3"
+    Target: "h2"
+    MinRatio: 1
+    MaxRTT: 5

@@ -57,4 +57,5 @@ func registration(client *mininet.Client) {
 	if viper.GetBool("PingAllTest") {
 		prometheus.MustRegister(collector.NewPingAllCollector(client))
 	}
+	prometheus.MustRegister(collector.NewPingCollector(client, ExporterConfig.PingTests))
 }

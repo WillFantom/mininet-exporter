@@ -3,9 +3,21 @@ package main
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/willfantom/mininet-exporter/collector"
 )
 
+type Config struct {
+	Debug         bool
+	Trace         bool
+	ServeAddress  string `mapstructure:"path_map"`
+	ServePort     int
+	MininetTarget string
+	PingAllTest   bool
+	PingTests     []collector.PingTest
+}
+
 var (
+	ExporterConfig   Config
 	DefaultServePort int = 9881
 )
 
@@ -46,4 +58,5 @@ func readConfiguration() {
 			logrus.WithField("err msg", err.Error()).Fatalln("🆘	could not read in given configuration file: exiting...")
 		}
 	}
+	viper.Unmarshal(&ExporterConfig)
 }

@@ -79,3 +79,60 @@ func (c *Client) PingAll() (map[string]PingResponse, error) {
 
 	return responses, nil
 }
+
+func (c *Client) Ping(source, target string) (PingResponse, error) {
+
+	var pingData PingResponse
+
+	path := &url.URL{Path: APIPrefix + "/pingset"}
+	fullURL := c.BaseURL.ResolveReference(path)
+	request, err := http.NewRequest("GET", fullURL.String(), nil)
+	query := request.URL.Query()
+	query.Add("hosts", source+","+target)
+	request.URL.RawQuery = query.Encode()
+	logrus.Infoln(request.URL.String())
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"full url": fullURL.String(),
+			"message":  err.Error(),
+		}).Errorln("⚠️	could not create ping all request")
+		return pingData, err
+	}
+
+	response, err := c.httpClient.Do(request)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"full url": fullURL.String(),
+			"message":  err.Error(),
+		}).Errorln("⚠️	failed ping all request")
+		return pingData, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		logrus.WithFields(logrus.Fields{
+			"full url":        fullURL.String(),
+			"response status": response.StatusCode,
+			"message":         err.Error(),
+		}).Warnln("⚠️	failed ping all request")
+		return pingData, err
+	}
+
+	var pingSetData map[string]PingResponse
+	if err := json.NewDecoder(response.Body).Decode(&pingSetData); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"full url":        fullURL.String(),
+			"response status": response.StatusCode,
+			"message":         err.Error(),
+		}).Errorln("⚠️	failed to parse ping all response")
+		return pingData, err
+	}
+
+	for _, data := range pingSetData {
+		if data.Sender == source {
+			return data, nil
+		}
+	}
+
+	return pingData, nil
+}
